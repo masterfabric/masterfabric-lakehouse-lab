@@ -8,7 +8,7 @@ DAYS    ?= 7
 PY      ?= .venv/bin/python
 
 .PHONY: help env up down ps logs generate bronze silver gold quality demos scala pipeline \
-        test test-unit test-spark bench trino-sql screenshots assets clean-data reset
+        test test-unit test-spark bench trino-sql notebook screenshots assets clean-data reset
 
 help: ## Show targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n",$$1,$$2}'
@@ -63,10 +63,14 @@ test-spark: ## Spark transformation tests (inside the Spark container, local mod
 	docker exec -w /lab -e PYTHONPATH=/lab:/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip mf-lake-spark python -m pytest -q -p no:cacheprovider tests/spark
 
 bench: ## Measure the pipeline at several scales and write docs/results
-	$(SPARK) python scripts/benchmark.py
+	docker exec -w /lab -e LAB_HOST="$$(sysctl -n machdep.cpu.brand_string 2>/dev/null || uname -m), $$(( $$(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1073741824 )) GB RAM" mf-lake-spark python scripts/benchmark.py
 
 trino-sql: ## Run the showcase Trino queries and save their output
 	$(PY) scripts/trino_queries.py
+
+notebook: ## Build and execute notebooks/lakehouse_tour.ipynb inside the Spark container
+	$(SPARK) python scripts/build_notebook.py
+	docker exec -w /lab -e PYTHONPATH=/lab:/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip mf-lake-spark jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=600 notebooks/lakehouse_tour.ipynb
 
 screenshots: ## Capture UI screenshots with Playwright (stack must be up)
 	$(PY) scripts/screenshots.py
