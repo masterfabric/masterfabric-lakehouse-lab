@@ -129,6 +129,21 @@ def _merge_quarantine(spark: SparkSession, q: DataFrame) -> None:
                   WHEN NOT MATCHED THEN INSERT *""")
 
 
+def _merge_sql(target: str, source: str, key: str, columns: list[str]) -> str:
+    """MERGE with explicit column lists instead of `UPDATE SET *` / `INSERT *`.
+
+    Explicit lists keep the job working after schema evolution on the target: a column
+    added later by another team (see iceberg_demos.py) is simply left NULL for new rows
+    instead of failing the load because the source lacks it.
+    """
+    cols = ", ".join(columns)
+    vals = ", ".join(f"s.{c}" for c in columns)
+    sets = ", ".join(f"t.{c} = s.{c}" for c in columns if c != key)
+    return f"""MERGE INTO {L}.{target} t USING {source} s ON t.{key} = s.{key}
+               WHEN MATCHED AND s._ingested_at > t._ingested_at THEN UPDATE SET {sets}
+               WHEN NOT MATCHED THEN INSERT ({cols}) VALUES ({vals})"""
+
+
 def load_cdr(spark: SparkSession, stats: dict) -> None:
     raw, snap = _incremental(spark, "bronze.cdr_raw")
     if raw is None:
@@ -142,9 +157,7 @@ def load_cdr(spark: SparkSession, stats: dict) -> None:
         "duration_s", "cell_id", "city", "is_dropped", "is_roaming", "charge_try", "_source_file", "_ingested_at")
     good.createOrReplaceTempView("_cdr_src")
     # Upsert: a correction re-sent by the switch (same record_id, newer ingestion) replaces the row.
-    spark.sql(f"""MERGE INTO {L}.silver.cdr t USING _cdr_src s ON t.record_id = s.record_id
-                  WHEN MATCHED AND s._ingested_at > t._ingested_at THEN UPDATE SET *
-                  WHEN NOT MATCHED THEN INSERT *""")
+    spark.sql(_merge_sql("silver.cdr", "_cdr_src", "record_id", good.columns))
     _merge_quarantine(spark, _quarantine(deduped.filter("_reason IS NOT NULL"), "cdr", "record_id",
                                          ["record_id", "calling_msisdn", "start_time", "duration_s", "cell_id"]))
     stats["cdr"] = {
@@ -167,9 +180,7 @@ def load_sessions(spark: SparkSession, stats: dict) -> None:
         "session_id", "subscriber_id", "msisdn", "start_time", "duration_s", "cell_id", "city", "rat",
         "app_category", "bytes_down", "bytes_up", "avg_throughput_kbps", "_source_file", "_ingested_at")
     good.createOrReplaceTempView("_sess_src")
-    spark.sql(f"""MERGE INTO {L}.silver.sessions t USING _sess_src s ON t.session_id = s.session_id
-                  WHEN MATCHED AND s._ingested_at > t._ingested_at THEN UPDATE SET *
-                  WHEN NOT MATCHED THEN INSERT *""")
+    spark.sql(_merge_sql("silver.sessions", "_sess_src", "session_id", good.columns))
     _merge_quarantine(spark, _quarantine(deduped.filter("_reason IS NOT NULL"), "sessions", "session_id",
                                          ["session_id", "msisdn", "start", "cell_id", "bytes_down"]))
     stats["sessions"] = {
