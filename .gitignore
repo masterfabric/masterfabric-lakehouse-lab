@@ -1,0 +1,30 @@
+# local configuration and secrets
+.env
+*.pem
+*.key
+
+# generated data and runtime state
+data/
+warehouse/
+.out/
+*.parquet
+*.crc
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# scala / jvm
+jobs/scala/target/
+jobs/scala/project/target/
+*.class
+.bsp/
+.metals/
+
+# os / editors
+.DS_Store
+.idea/
+.vscode/
