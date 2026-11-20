@@ -1,0 +1,110 @@
+# MasterFabric Lakehouse Lab: object storage + Iceberg REST catalog + Spark + Trino.
+# Every port is bound to 127.0.0.1; this is a laptop lab, not a hardened deployment.
+name: mf-lakehouse
+
+x-s3-env: &s3-env
+  AWS_ACCESS_KEY_ID: ${LAKE_S3_ACCESS_KEY}
+  AWS_SECRET_ACCESS_KEY: ${LAKE_S3_SECRET_KEY}
+  AWS_REGION: ${LAKE_S3_REGION}
+  AWS_DEFAULT_REGION: ${LAKE_S3_REGION}
+
+services:
+  # S3-compatible object storage (the HDFS / Ozone stand-in). RustFS speaks the S3 API and
+  # ships a web console; see docs/adr/0002-object-storage.md for why it replaces MinIO here.
+  s3:
+    image: rustfs/rustfs:1.0.6
+    container_name: mf-lake-s3
+    environment:
+      RUSTFS_ACCESS_KEY: ${LAKE_S3_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${LAKE_S3_SECRET_KEY}
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+    volumes:
+      - s3-data:/data
+    ports:
+      - "127.0.0.1:${PORT_S3_API}:9000"
+      - "127.0.0.1:${PORT_S3_CONSOLE}:9001"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/health || wget -qO- http://localhost:9000/health || exit 1"]
+      interval: 5s
+      retries: 30
+
+  # One-shot: create the buckets. Exits 0 when done.
+  s3-init:
+    image: amazon/aws-cli:latest
+    container_name: mf-lake-s3-init
+    depends_on:
+      s3:
+        condition: service_started
+    environment: *s3-env
+    entrypoint: ["/bin/sh", "/init/create-buckets.sh"]
+    volumes:
+      - ./s3:/init:ro
+
+  # Iceberg REST catalog (the Hive Metastore stand-in). Metadata lives in SQLite on a volume
+  # so tables survive restarts; data and metadata files live in object storage.
+  catalog:
+    image: apache/iceberg-rest-fixture:1.8.1
+    container_name: mf-lake-catalog
+    depends_on:
+      s3-init:
+        condition: service_completed_successfully
+    environment:
+      <<: *s3-env
+      CATALOG_URI: jdbc:sqlite:file:/var/lib/iceberg/catalog.db
+      CATALOG_WAREHOUSE: ${LAKE_WAREHOUSE}
+      CATALOG_IO__IMPL: org.apache.iceberg.aws.s3.S3FileIO
+      CATALOG_S3_ENDPOINT: http://s3:9000
+      CATALOG_S3_PATH__STYLE__ACCESS: "true"
+    user: root
+    volumes:
+      - catalog-data:/var/lib/iceberg
+    ports:
+      - "127.0.0.1:${PORT_CATALOG}:8181"
+
+  # Spark 3.5 + Iceberg runtime + Jupyter. Jobs are submitted with `make` via docker exec.
+  spark:
+    build: ./spark
+    image: mf-lakehouse/spark:3.5.5-iceberg1.8.1
+    container_name: mf-lake-spark
+    hostname: spark-iceberg
+    depends_on:
+      - catalog
+    environment:
+      <<: *s3-env
+      SPARK_DRIVER_MEMORY: ${SPARK_DRIVER_MEMORY}
+      LAKE_S3_ENDPOINT: http://s3:9000
+      LAKE_CATALOG_URI: http://catalog:8181
+      LAKE_WAREHOUSE: ${LAKE_WAREHOUSE}
+      PYTHONPATH: /lab
+    volumes:
+      - ..:/lab
+      - ../data/landing:/landing
+      - spark-events:/home/iceberg/spark-events
+    command: ["notebook"]
+    ports:
+      - "127.0.0.1:${PORT_JUPYTER}:8888"
+      - "127.0.0.1:${PORT_SPARK_UI}:4040"
+      - "127.0.0.1:${PORT_SPARK_HISTORY}:18080"
+
+  # Trino as the interactive MPP SQL engine (the Impala stand-in).
+  trino:
+    image: trinodb/trino:475
+    container_name: mf-lake-trino
+    depends_on:
+      - catalog
+    environment:
+      LAKE_S3_ACCESS_KEY: ${LAKE_S3_ACCESS_KEY}
+      LAKE_S3_SECRET_KEY: ${LAKE_S3_SECRET_KEY}
+      LAKE_S3_REGION: ${LAKE_S3_REGION}
+    volumes:
+      - ./trino/catalog:/etc/trino/catalog:ro
+      - ./trino/jvm.config:/etc/trino/jvm.config:ro
+    ports:
+      - "127.0.0.1:${PORT_TRINO}:8080"
+
+volumes:
+  s3-data:
+  catalog-data:
+  spark-events:
