@@ -102,9 +102,12 @@ def _pick(rng: random.Random, items, weight_index: int):
 
 
 def msisdn(n: int) -> str:
-    # Turkish mobile numbering: +90 5xx xxx xx xx. Synthetic block 59x is not assigned
-    # to any real operator, so no generated number belongs to a real person.
-    return f"9059{n:09d}"[:12]
+    # Turkish mobile numbering: +90 5xx xxx xx xx (12 digits with the country code). The
+    # synthetic 59x block is not assigned to a mobile operator, so no generated number
+    # belongs to a real person. 8 free digits allow 100 million unique numbers.
+    if not 0 <= n < 100_000_000:
+        raise ValueError(f"msisdn index out of range: {n}")
+    return f"9059{n:08d}"
 
 
 class Generator:
