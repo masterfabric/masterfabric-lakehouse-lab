@@ -71,6 +71,7 @@ trino-sql: ## Run the showcase Trino queries and save their output
 notebook: ## Build and execute notebooks/lakehouse_tour.ipynb inside the Spark container
 	$(SPARK) python scripts/build_notebook.py
 	docker exec -w /lab -e PYTHONPATH=/lab:/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip mf-lake-spark jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=600 notebooks/lakehouse_tour.ipynb
+	$(SPARK) python scripts/build_notebook.py --strip-stderr
 
 screenshots: ## Capture UI screenshots with Playwright (stack must be up)
 	$(PY) scripts/screenshots.py
