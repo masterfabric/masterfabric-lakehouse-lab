@@ -1,0 +1,12 @@
+{
+  "daily_subscriber_usage_seconds": 2.241,
+  "cell_hourly_load_seconds": 0.716,
+  "churn_features_seconds": 0.613,
+  "daily_subscriber_usage_rows": 13865,
+  "cell_hourly_load_rows": 19377,
+  "churn_features_rows": 2000,
+  "congested_cell_hours": 168,
+  "panel_weight": 60.0,
+  "congestion_threshold": 0.8,
+  "seconds": 3.849
+}

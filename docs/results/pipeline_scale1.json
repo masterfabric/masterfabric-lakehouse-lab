@@ -1,0 +1,246 @@
+{
+  "label": "scale1",
+  "scale": 1.0,
+  "days": 7,
+  "finished_at": "2026-11-20T23:00:32+00:00",
+  "wall_seconds": {
+    "generate": 3.4,
+    "bronze": 8.01,
+    "silver": 9.5,
+    "gold": 5.75,
+    "quality": 6.49
+  },
+  "total_seconds": 33.15,
+  "manifest": {
+    "cdr_records": 124286,
+    "session_records": 131064,
+    "subscribers": 2000,
+    "cells": 120
+  },
+  "injected": {
+    "duplicates": 2599,
+    "late": 3726,
+    "bad_msisdn": 232,
+    "neg_duration": 89,
+    "unknown_cell": 557,
+    "alt_ts_format": 12745
+  },
+  "layers": {
+    "bronze": {
+      "batch_id": "20261120T230004-b1834e",
+      "feeds": [
+        {
+          "feed": "subscribers",
+          "new_files": 1,
+          "rows": 2000,
+          "seconds": 2.769
+        },
+        {
+          "feed": "cells",
+          "new_files": 1,
+          "rows": 120,
+          "seconds": 0.704
+        },
+        {
+          "feed": "cdr",
+          "new_files": 8,
+          "rows": 125595,
+          "seconds": 1.079
+        },
+        {
+          "feed": "sessions",
+          "new_files": 8,
+          "rows": 132354,
+          "seconds": 1.248
+        }
+      ],
+      "seconds": 5.801
+    },
+    "silver": {
+      "subscribers": 2000,
+      "cells": 120,
+      "dimensions_seconds": 2.856,
+      "cdr": {
+        "new_bronze_rows": 125595,
+        "distinct_records": 124286,
+        "valid": 123689,
+        "quarantined": 597
+      },
+      "cdr_seconds": 2.507,
+      "sessions": {
+        "new_bronze_rows": 132354,
+        "distinct_records": 131064,
+        "valid": 130784,
+        "quarantined": 280
+      },
+      "sessions_seconds": 1.695,
+      "seconds": 7.058,
+      "quarantine_by_reason": {
+        "cdr:invalid_msisdn": 232,
+        "cdr:negative_duration": 89,
+        "cdr:unknown_cell": 276,
+        "sessions:unknown_cell": 280
+      }
+    },
+    "gold": {
+      "daily_subscriber_usage_seconds": 2.083,
+      "cell_hourly_load_seconds": 0.615,
+      "churn_features_seconds": 0.63,
+      "daily_subscriber_usage_rows": 13860,
+      "cell_hourly_load_rows": 19377,
+      "churn_features_rows": 2000,
+      "congested_cell_hours": 168,
+      "panel_weight": 60.0,
+      "congestion_threshold": 0.8,
+      "seconds": 3.695
+    },
+    "quality": {
+      "seconds": 3.585,
+      "rules": 20,
+      "passed": 20,
+      "failed": [],
+      "results": [
+        {
+          "rule": "cdr_record_id_not_null",
+          "kind": "completeness",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "cdr_record_id_unique",
+          "kind": "uniqueness",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "session_id_unique",
+          "kind": "uniqueness",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "subscriber_msisdn_unique",
+          "kind": "uniqueness",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "cell_id_unique",
+          "kind": "uniqueness",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "cdr_duration_non_negative",
+          "kind": "validity",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "cdr_msisdn_format",
+          "kind": "validity",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "session_volume_non_negative",
+          "kind": "validity",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "cell_utilization_plausible",
+          "kind": "validity",
+          "severity": "warn",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "cdr_subscriber_exists",
+          "kind": "integrity",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "cdr_cell_exists",
+          "kind": "integrity",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "session_cell_exists",
+          "kind": "integrity",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "bronze_cdr_rows_match_files",
+          "kind": "reconciliation",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "bronze_session_rows_match_files",
+          "kind": "reconciliation",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "cdr_every_record_accounted",
+          "kind": "reconciliation",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "sessions_every_record_accounted",
+          "kind": "reconciliation",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "duplicates_removed_exactly",
+          "kind": "reconciliation",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "bad_msisdn_quarantined_exactly",
+          "kind": "reconciliation",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "gold_minutes_match_silver",
+          "kind": "reconciliation",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        },
+        {
+          "rule": "cdr_has_every_day",
+          "kind": "freshness",
+          "severity": "error",
+          "value": 0.0,
+          "passed": true
+        }
+      ]
+    }
+  }
+}

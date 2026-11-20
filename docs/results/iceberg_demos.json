@@ -1,0 +1,515 @@
+{
+  "table": "lake.silver.cdr",
+  "started_at": "2026-11-20T23:00:33+00:00",
+  "schema_evolution": {
+    "statements": [
+      "ALTER TABLE lake.silver.cdr ADD COLUMN charging_zone STRING AFTER city",
+      "ALTER TABLE lake.silver.cdr ALTER COLUMN duration_s TYPE BIGINT",
+      "ALTER TABLE lake.silver.cdr RENAME COLUMN charging_zone TO billing_zone"
+    ],
+    "columns_before": [
+      "record_id:string",
+      "event_type:string",
+      "subscriber_id:string",
+      "calling_msisdn:string",
+      "called_msisdn:string",
+      "event_time:timestamp",
+      "duration_s:int",
+      "cell_id:string",
+      "city:string",
+      "is_dropped:boolean",
+      "is_roaming:boolean",
+      "charge_try:decimal(10,2)",
+      "_source_file:string",
+      "_ingested_at:timestamp"
+    ],
+    "columns_after": [
+      "record_id:string",
+      "event_type:string",
+      "subscriber_id:string",
+      "calling_msisdn:string",
+      "called_msisdn:string",
+      "event_time:timestamp",
+      "duration_s:bigint",
+      "cell_id:string",
+      "city:string",
+      "billing_zone:string",
+      "is_dropped:boolean",
+      "is_roaming:boolean",
+      "charge_try:decimal(10,2)",
+      "_source_file:string",
+      "_ingested_at:timestamp"
+    ],
+    "data_files_rewritten": 0,
+    "old_rows_billing_zone_null": 123689
+  },
+  "step_seconds": {
+    "schema_evolution": 1.257,
+    "partition_evolution": 0.412,
+    "late_corrections": 18.554,
+    "time_travel": 0.349,
+    "maintenance": 3.139
+  },
+  "partition_evolution": {
+    "statement": "ALTER TABLE lake.silver.cdr REPLACE PARTITION FIELD months(event_time) WITH days(event_time)",
+    "partitions_before": [
+      {
+        "partition": {
+          "event_time_month": 681
+        },
+        "record_count": 123689,
+        "file_count": 1
+      }
+    ],
+    "specs": [
+      {
+        "spec_id": 0
+      }
+    ]
+  },
+  "time_travel_probe_record": "R000000000000",
+  "snapshot_before_corrections": {
+    "snapshot_id": 1954455809700164019,
+    "committed_at": "2026-11-20 23:00:17.288000"
+  },
+  "files_before_corrections": [
+    {
+      "spec_id": 0,
+      "content": "data",
+      "files": 1,
+      "records": 123689,
+      "mib": 1.96
+    }
+  ],
+  "late_corrections": [
+    {
+      "file": "cdr_2026-10-08_correction_00.csv.gz",
+      "rows": 71,
+      "corrected": 41,
+      "new": 30,
+      "operation": "overwrite",
+      "added-data-files": 7,
+      "added-position-delete-files": 1,
+      "added-records": 71,
+      "added-position-deletes": 41,
+      "total-data-files": 8,
+      "total-delete-files": 1,
+      "total-records": 123760,
+      "silver": {
+        "new_bronze_rows": 71,
+        "distinct_records": 71,
+        "valid": 71,
+        "quarantined": 0
+      }
+    },
+    {
+      "file": "cdr_2026-10-08_correction_01.csv.gz",
+      "rows": 70,
+      "corrected": 40,
+      "new": 30,
+      "operation": "overwrite",
+      "added-data-files": 7,
+      "added-position-delete-files": 1,
+      "added-records": 70,
+      "added-position-deletes": 81,
+      "total-data-files": 15,
+      "total-delete-files": 1,
+      "total-records": 123830,
+      "silver": {
+        "new_bronze_rows": 70,
+        "distinct_records": 70,
+        "valid": 70,
+        "quarantined": 0
+      }
+    },
+    {
+      "file": "cdr_2026-10-08_correction_02.csv.gz",
+      "rows": 70,
+      "corrected": 40,
+      "new": 30,
+      "operation": "overwrite",
+      "added-data-files": 7,
+      "added-position-delete-files": 1,
+      "added-records": 70,
+      "added-position-deletes": 121,
+      "total-data-files": 22,
+      "total-delete-files": 1,
+      "total-records": 123900,
+      "silver": {
+        "new_bronze_rows": 70,
+        "distinct_records": 70,
+        "valid": 70,
+        "quarantined": 0
+      }
+    },
+    {
+      "file": "cdr_2026-10-08_correction_03.csv.gz",
+      "rows": 70,
+      "corrected": 40,
+      "new": 30,
+      "operation": "overwrite",
+      "added-data-files": 7,
+      "added-position-delete-files": 1,
+      "added-records": 70,
+      "added-position-deletes": 161,
+      "total-data-files": 29,
+      "total-delete-files": 1,
+      "total-records": 123970,
+      "silver": {
+        "new_bronze_rows": 70,
+        "distinct_records": 70,
+        "valid": 70,
+        "quarantined": 0
+      }
+    },
+    {
+      "file": "cdr_2026-10-08_correction_04.csv.gz",
+      "rows": 70,
+      "corrected": 40,
+      "new": 30,
+      "operation": "overwrite",
+      "added-data-files": 7,
+      "added-position-delete-files": 1,
+      "added-records": 70,
+      "added-position-deletes": 201,
+      "total-data-files": 36,
+      "total-delete-files": 1,
+      "total-records": 124040,
+      "silver": {
+        "new_bronze_rows": 70,
+        "distinct_records": 70,
+        "valid": 70,
+        "quarantined": 0
+      }
+    },
+    {
+      "file": "cdr_2026-10-08_correction_05.csv.gz",
+      "rows": 70,
+      "corrected": 40,
+      "new": 30,
+      "operation": "overwrite",
+      "added-data-files": 7,
+      "added-position-delete-files": 1,
+      "added-records": 70,
+      "added-position-deletes": 241,
+      "total-data-files": 43,
+      "total-delete-files": 1,
+      "total-records": 124110,
+      "silver": {
+        "new_bronze_rows": 70,
+        "distinct_records": 70,
+        "valid": 70,
+        "quarantined": 0
+      }
+    },
+    {
+      "file": "cdr_2026-10-08_correction_06.csv.gz",
+      "rows": 70,
+      "corrected": 40,
+      "new": 30,
+      "operation": "overwrite",
+      "added-data-files": 7,
+      "added-position-delete-files": 1,
+      "added-records": 70,
+      "added-position-deletes": 281,
+      "total-data-files": 50,
+      "total-delete-files": 1,
+      "total-records": 124180,
+      "silver": {
+        "new_bronze_rows": 70,
+        "distinct_records": 70,
+        "valid": 70,
+        "quarantined": 0
+      }
+    },
+    {
+      "file": "cdr_2026-10-08_correction_07.csv.gz",
+      "rows": 70,
+      "corrected": 40,
+      "new": 30,
+      "operation": "overwrite",
+      "added-data-files": 7,
+      "added-position-delete-files": 1,
+      "added-records": 70,
+      "added-position-deletes": 321,
+      "total-data-files": 57,
+      "total-delete-files": 1,
+      "total-records": 124250,
+      "silver": {
+        "new_bronze_rows": 70,
+        "distinct_records": 70,
+        "valid": 70,
+        "quarantined": 0
+      }
+    },
+    {
+      "file": "cdr_2026-10-08_correction_08.csv.gz",
+      "rows": 70,
+      "corrected": 40,
+      "new": 30,
+      "operation": "overwrite",
+      "added-data-files": 7,
+      "added-position-delete-files": 1,
+      "added-records": 70,
+      "added-position-deletes": 361,
+      "total-data-files": 64,
+      "total-delete-files": 1,
+      "total-records": 124320,
+      "silver": {
+        "new_bronze_rows": 70,
+        "distinct_records": 70,
+        "valid": 70,
+        "quarantined": 0
+      }
+    },
+    {
+      "file": "cdr_2026-10-08_correction_09.csv.gz",
+      "rows": 70,
+      "corrected": 40,
+      "new": 30,
+      "operation": "overwrite",
+      "added-data-files": 7,
+      "added-position-delete-files": 2,
+      "added-records": 70,
+      "added-position-deletes": 401,
+      "total-data-files": 71,
+      "total-delete-files": 2,
+      "total-records": 124390,
+      "silver": {
+        "new_bronze_rows": 70,
+        "distinct_records": 70,
+        "valid": 70,
+        "quarantined": 0
+      }
+    }
+  ],
+  "files_after_corrections": [
+    {
+      "spec_id": 0,
+      "content": "data",
+      "files": 1,
+      "records": 123689,
+      "mib": 1.96
+    },
+    {
+      "spec_id": 0,
+      "content": "position_deletes",
+      "files": 1,
+      "records": 400,
+      "mib": 0.0
+    },
+    {
+      "spec_id": 1,
+      "content": "data",
+      "files": 70,
+      "records": 701,
+      "mib": 0.36
+    },
+    {
+      "spec_id": 1,
+      "content": "position_deletes",
+      "files": 1,
+      "records": 1,
+      "mib": 0.0
+    }
+  ],
+  "time_travel": {
+    "query_version_as_of": "SELECT count(*) AS records, round(sum(charge_try), 2) AS charge_try FROM lake.silver.cdr VERSION AS OF 1954455809700164019",
+    "before": {
+      "records": 123689,
+      "charge_try": "150948.79"
+    },
+    "query_timestamp_as_of": "... FROM lake.silver.cdr TIMESTAMP AS OF '2026-11-20 23:00:17.288000'",
+    "before_by_timestamp": {
+      "records": 123689,
+      "charge_try": "150948.79"
+    },
+    "now": {
+      "records": 123989,
+      "charge_try": "151500.04"
+    },
+    "probe_record": {
+      "record_id": "R000000000000",
+      "before": "2.56",
+      "now": "2.82"
+    },
+    "history": [
+      {
+        "snapshot_id": 1954455809700164019,
+        "parent_id": null,
+        "operation": "overwrite",
+        "added_records": "123689",
+        "total_records": "123689"
+      },
+      {
+        "snapshot_id": 512885723461588950,
+        "parent_id": 1954455809700164019,
+        "operation": "overwrite",
+        "added_records": "71",
+        "total_records": "123760"
+      },
+      {
+        "snapshot_id": 1133951967433424295,
+        "parent_id": 512885723461588950,
+        "operation": "overwrite",
+        "added_records": "70",
+        "total_records": "123830"
+      },
+      {
+        "snapshot_id": 2255259027943329733,
+        "parent_id": 1133951967433424295,
+        "operation": "overwrite",
+        "added_records": "70",
+        "total_records": "123900"
+      },
+      {
+        "snapshot_id": 1854418373399102095,
+        "parent_id": 2255259027943329733,
+        "operation": "overwrite",
+        "added_records": "70",
+        "total_records": "123970"
+      },
+      {
+        "snapshot_id": 8532311931706394745,
+        "parent_id": 1854418373399102095,
+        "operation": "overwrite",
+        "added_records": "70",
+        "total_records": "124040"
+      },
+      {
+        "snapshot_id": 1709987702385796711,
+        "parent_id": 8532311931706394745,
+        "operation": "overwrite",
+        "added_records": "70",
+        "total_records": "124110"
+      },
+      {
+        "snapshot_id": 9080523870731641213,
+        "parent_id": 1709987702385796711,
+        "operation": "overwrite",
+        "added_records": "70",
+        "total_records": "124180"
+      },
+      {
+        "snapshot_id": 8195918039105820089,
+        "parent_id": 9080523870731641213,
+        "operation": "overwrite",
+        "added_records": "70",
+        "total_records": "124250"
+      },
+      {
+        "snapshot_id": 1006540757286300485,
+        "parent_id": 8195918039105820089,
+        "operation": "overwrite",
+        "added_records": "70",
+        "total_records": "124320"
+      },
+      {
+        "snapshot_id": 6691363791319682097,
+        "parent_id": 1006540757286300485,
+        "operation": "overwrite",
+        "added_records": "70",
+        "total_records": "124390"
+      }
+    ]
+  },
+  "maintenance": {
+    "query": "SELECT count(*) n, sum(charge_try) charge FROM lake.silver.cdr WHERE event_time >= TIMESTAMP '2026-10-05 00:00:00' AND event_time < TIMESTAMP '2026-10-06 00:00:00'",
+    "before": {
+      "files": [
+        {
+          "spec_id": 0,
+          "content": "data",
+          "files": 1,
+          "records": 123689,
+          "mib": 1.96
+        },
+        {
+          "spec_id": 0,
+          "content": "position_deletes",
+          "files": 1,
+          "records": 400,
+          "mib": 0.0
+        },
+        {
+          "spec_id": 1,
+          "content": "data",
+          "files": 70,
+          "records": 701,
+          "mib": 0.36
+        },
+        {
+          "spec_id": 1,
+          "content": "position_deletes",
+          "files": 1,
+          "records": 1,
+          "mib": 0.0
+        }
+      ],
+      "snapshots": 11,
+      "query": {
+        "median_ms": 67.8,
+        "runs": 7
+      },
+      "result": {
+        "n": 16258,
+        "charge": "19666.15"
+      }
+    },
+    "rewrite_data_files": {
+      "rewritten_data_files_count": 71,
+      "added_data_files_count": 14,
+      "rewritten_bytes_count": 2437199,
+      "failed_data_files_count": 0
+    },
+    "rewrite_position_delete_files": {
+      "rewritten_delete_files_count": 1,
+      "added_delete_files_count": 0,
+      "rewritten_bytes_count": 1552,
+      "added_bytes_count": 0
+    },
+    "compaction_seconds": 1.24,
+    "after_compaction": {
+      "files": [
+        {
+          "spec_id": 1,
+          "content": "data",
+          "files": 14,
+          "records": 123989,
+          "mib": 2.09
+        }
+      ],
+      "query": {
+        "median_ms": 28.9,
+        "runs": 7
+      },
+      "result": {
+        "n": 16258,
+        "charge": "19666.15"
+      }
+    },
+    "expire_snapshots": {
+      "deleted_data_files_count": 71,
+      "deleted_position_delete_files_count": 9,
+      "deleted_equality_delete_files_count": 0,
+      "deleted_manifest_files_count": 29,
+      "deleted_manifest_lists_count": 11,
+      "deleted_statistics_files_count": 0
+    },
+    "snapshots_before_expiry": 14,
+    "snapshots_after_expiry": 3,
+    "orphan_guard": "Cannot remove orphan files with an interval less than 24 hours",
+    "orphan_files_dry_run": {
+      "method": "Iceberg FileIO listPrefix vs. all referenced files",
+      "objects_listed": 55,
+      "referenced": 55,
+      "orphans": 0,
+      "sample": []
+    },
+    "storage_after": {
+      "files": 14,
+      "bytes": 2195602,
+      "records": 123989
+    }
+  }
+}

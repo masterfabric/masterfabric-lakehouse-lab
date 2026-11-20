@@ -1,0 +1,250 @@
+{
+  "congestion_backlog": {
+    "sql": "SELECT upgrade_priority, count(*) AS cells, round(avg(p95_utilization), 3) AS avg_p95_utilization, sum(congested_hours) AS congested_hours FROM lake.gold.cell_congestion_ranking GROUP BY 1 ORDER BY 1",
+    "columns": [
+      "upgrade_priority",
+      "cells",
+      "avg_p95_utilization",
+      "congested_hours"
+    ],
+    "rows": [
+      [
+        "P1-upgrade-now",
+        8,
+        0.959,
+        129
+      ],
+      [
+        "P2-plan-next-quarter",
+        5,
+        0.707,
+        24
+      ],
+      [
+        "P3-monitor",
+        107,
+        0.318,
+        15
+      ]
+    ],
+    "warm_ms": 42.6
+  },
+  "busiest_cities_evening_peak": {
+    "sql": "SELECT city, round(avg(utilization), 3) AS avg_util_19_22h, count_if(is_congested) AS congested_cell_hours FROM lake.gold.cell_hourly_load WHERE hour(hour_ts) BETWEEN 19 AND 22 GROUP BY 1 ORDER BY 2 DESC LIMIT 5",
+    "columns": [
+      "city",
+      "avg_util_19_22h",
+      "congested_cell_hours"
+    ],
+    "rows": [
+      [
+        "Kayseri",
+        0.29,
+        5
+      ],
+      [
+        "Trabzon",
+        0.278,
+        5
+      ],
+      [
+        "Istanbul",
+        0.272,
+        36
+      ],
+      [
+        "Ankara",
+        0.26,
+        11
+      ],
+      [
+        "Izmir",
+        0.235,
+        8
+      ]
+    ],
+    "warm_ms": 58.8
+  },
+  "usage_by_segment": {
+    "sql": "SELECT segment, count(DISTINCT subscriber_id) AS subscribers, round(sum(voice_minutes) / count(DISTINCT subscriber_id), 1) AS minutes_per_sub, round(sum(data_mb) / count(DISTINCT subscriber_id) / 1024, 2) AS gb_per_sub, round(sum(dropped_calls) * 100.0 / nullif(sum(voice_calls), 0), 2) AS drop_pct FROM lake.gold.daily_subscriber_usage GROUP BY 1 ORDER BY 3 DESC",
+    "columns": [
+      "segment",
+      "subscribers",
+      "minutes_per_sub",
+      "gb_per_sub",
+      "drop_pct"
+    ],
+    "rows": [
+      [
+        "business",
+        140,
+        92.0,
+        41.84,
+        "2.2"
+      ],
+      [
+        "postpaid",
+        1247,
+        87.8,
+        34.92,
+        "2.4"
+      ],
+      [
+        "prepaid",
+        613,
+        76.8,
+        12.61,
+        "3.8"
+      ]
+    ],
+    "warm_ms": 103.4
+  },
+  "quarantine_by_reason": {
+    "sql": "SELECT feed, reason, count(*) AS records FROM lake.silver.quarantine GROUP BY 1, 2 ORDER BY 3 DESC",
+    "columns": [
+      "feed",
+      "reason",
+      "records"
+    ],
+    "rows": [
+      [
+        "sessions",
+        "unknown_cell",
+        280
+      ],
+      [
+        "cdr",
+        "unknown_cell",
+        276
+      ],
+      [
+        "cdr",
+        "invalid_msisdn",
+        232
+      ],
+      [
+        "cdr",
+        "negative_duration",
+        89
+      ]
+    ],
+    "warm_ms": 50.0
+  },
+  "time_travel_in_trino": {
+    "sql": "SELECT 'first build (snapshot 1035650361873718545)' AS version, count(*) AS subscriber_days, sum(voice_calls) AS voice_calls, sum(charge_try) AS charge_try FROM lake.gold.daily_subscriber_usage FOR VERSION AS OF 1035650361873718545 UNION ALL SELECT 'current (after corrections)', count(*), sum(voice_calls), sum(charge_try) FROM lake.gold.daily_subscriber_usage",
+    "columns": [
+      "version",
+      "subscriber_days",
+      "voice_calls",
+      "charge_try"
+    ],
+    "rows": [
+      [
+        "first build (snapshot 1035650361873718545)",
+        13860,
+        94284,
+        "150948.79"
+      ],
+      [
+        "current (after corrections)",
+        13865,
+        94584,
+        "151500.04"
+      ]
+    ],
+    "warm_ms": 46.3
+  },
+  "dq_history": {
+    "sql": "SELECT date_format(run_at, '%Y-%m-%d %H:%i') AS run, count(*) AS rules, count_if(passed) AS passed FROM lake.ops.dq_results GROUP BY 1 ORDER BY 1",
+    "columns": [
+      "run",
+      "rules",
+      "passed"
+    ],
+    "rows": [
+      [
+        "2026-11-20 23:00",
+        20,
+        20
+      ],
+      [
+        "2026-11-20 23:01",
+        20,
+        20
+      ]
+    ],
+    "warm_ms": 52.1
+  },
+  "churn_score_deciles": {
+    "sql": "SELECT ntile AS decile, count(*) AS subscribers, round(avg(churn_risk_score), 3) AS avg_score, round(avg(usage_trend), 3) AS avg_usage_trend FROM (SELECT *, ntile(10) OVER (ORDER BY churn_risk_score DESC) AS ntile FROM lake.gold.churn_features) GROUP BY 1 ORDER BY 1",
+    "columns": [
+      "decile",
+      "subscribers",
+      "avg_score",
+      "avg_usage_trend"
+    ],
+    "rows": [
+      [
+        1,
+        200,
+        0.653,
+        0.167
+      ],
+      [
+        2,
+        200,
+        0.498,
+        0.347
+      ],
+      [
+        3,
+        200,
+        0.413,
+        0.456
+      ],
+      [
+        4,
+        200,
+        0.345,
+        0.512
+      ],
+      [
+        5,
+        200,
+        0.293,
+        0.672
+      ],
+      [
+        6,
+        200,
+        0.242,
+        0.953
+      ],
+      [
+        7,
+        200,
+        0.188,
+        1.031
+      ],
+      [
+        8,
+        200,
+        0.124,
+        1.711
+      ],
+      [
+        9,
+        200,
+        0.056,
+        1.964
+      ],
+      [
+        10,
+        200,
+        0.002,
+        2.483
+      ]
+    ],
+    "warm_ms": 58.9
+  }
+}

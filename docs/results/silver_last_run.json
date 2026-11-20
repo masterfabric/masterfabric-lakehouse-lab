@@ -1,0 +1,26 @@
+{
+  "subscribers": 2000,
+  "cells": 120,
+  "dimensions_seconds": 2.856,
+  "cdr": {
+    "new_bronze_rows": 125595,
+    "distinct_records": 124286,
+    "valid": 123689,
+    "quarantined": 597
+  },
+  "cdr_seconds": 2.507,
+  "sessions": {
+    "new_bronze_rows": 132354,
+    "distinct_records": 131064,
+    "valid": 130784,
+    "quarantined": 280
+  },
+  "sessions_seconds": 1.695,
+  "seconds": 7.058,
+  "quarantine_by_reason": {
+    "cdr:invalid_msisdn": 232,
+    "cdr:negative_duration": 89,
+    "cdr:unknown_cell": 276,
+    "sessions:unknown_cell": 280
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "batch_id": "20261120T230004-b1834e",
+  "feeds": [
+    {
+      "feed": "subscribers",
+      "new_files": 1,
+      "rows": 2000,
+      "seconds": 2.769
+    },
+    {
+      "feed": "cells",
+      "new_files": 1,
+      "rows": 120,
+      "seconds": 0.704
+    },
+    {
+      "feed": "cdr",
+      "new_files": 8,
+      "rows": 125595,
+      "seconds": 1.079
+    },
+    {
+      "feed": "sessions",
+      "new_files": 8,
+      "rows": 132354,
+      "seconds": 1.248
+    }
+  ],
+  "seconds": 5.801
+}

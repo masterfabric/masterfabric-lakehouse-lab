@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "measured_at": "2026-11-20T22:59:52+00:00",
+    "container_cpus": 6,
+    "container_platform": "Linux-6.8.0-117-generic-aarch64-with-glibc2.31",
+    "spark_master": "local[4]",
+    "driver_memory": "3g",
+    "host": "Apple M4 Pro, 24 GB RAM"
+  },
+  "runs": [
+    {
+      "scale": 1.0,
+      "subscribers": 2000,
+      "cells": 120,
+      "raw_records": 260069,
+      "silver_cdr": 123689,
+      "silver_sessions": 130784,
+      "quarantined": 877,
+      "dq_passed": "20/20",
+      "wall_seconds": {
+        "generate": 3.17,
+        "bronze": 7.63,
+        "silver": 9.57,
+        "gold": 5.73,
+        "quality": 6.33
+      },
+      "total_seconds": 32.43,
+      "lake_bytes": 15840610,
+      "lake_files": 62
+    },
+    {
+      "scale": 2.0,
+      "subscribers": 4000,
+      "cells": 169,
+      "raw_records": 526030,
+      "silver_cdr": 252293,
+      "silver_sessions": 262677,
+      "quarantined": 1716,
+      "dq_passed": "20/20",
+      "wall_seconds": {
+        "generate": 6.6,
+        "bronze": 8.34,
+        "silver": 11.2,
+        "gold": 6.25,
+        "quality": 6.68
+      },
+      "total_seconds": 39.06,
+      "lake_bytes": 31427321,
+      "lake_files": 62
+    },
+    {
+      "scale": 4.0,
+      "subscribers": 8000,
+      "cells": 240,
+      "raw_records": 1045790,
+      "silver_cdr": 503372,
+      "silver_sessions": 520625,
+      "quarantined": 3442,
+      "dq_passed": "20/20",
+      "wall_seconds": {
+        "generate": 13.29,
+        "bronze": 9.42,
+        "silver": 12.75,
+        "gold": 6.68,
+        "quality": 7.43
+      },
+      "total_seconds": 49.57,
+      "lake_bytes": 62249887,
+      "lake_files": 62
+    },
+    {
+      "scale": 8.0,
+      "subscribers": 16000,
+      "cells": 339,
+      "raw_records": 2097761,
+      "silver_cdr": 1006943,
+      "silver_sessions": 1047096,
+      "quarantined": 6879,
+      "dq_passed": "20/20",
+      "wall_seconds": {
+        "generate": 26.54,
+        "bronze": 10.99,
+        "silver": 15.34,
+        "gold": 7.62,
+        "quality": 8.1
+      },
+      "total_seconds": 68.59,
+      "lake_bytes": 124376856,
+      "lake_files": 62
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "tables": [
+    {
+      "table": "bronze.cdr_raw",
+      "files": 18,
+      "bytes": 1725116,
+      "records": 126296,
+      "snapshots": 11
+    },
+    {
+      "table": "bronze.cells_raw",
+      "files": 1,
+      "bytes": 6863,
+      "records": 120,
+      "snapshots": 1
+    },
+    {
+      "table": "bronze.sessions_raw",
+      "files": 8,
+      "bytes": 7987775,
+      "records": 132354,
+      "snapshots": 1
+    },
+    {
+      "table": "bronze.subscribers_raw",
+      "files": 1,
+      "bytes": 17898,
+      "records": 2000,
+      "snapshots": 1
+    },
+    {
+      "table": "silver.cdr",
+      "files": 14,
+      "bytes": 2195602,
+      "records": 123989,
+      "snapshots": 3
+    },
+    {
+      "table": "silver.cells",
+      "files": 1,
+      "bytes": 5981,
+      "records": 120,
+      "snapshots": 1
+    },
+    {
+      "table": "silver.quarantine",
+      "files": 4,
+      "bytes": 33785,
+      "records": 877,
+      "snapshots": 12
+    },
+    {
+      "table": "silver.sessions",
+      "files": 7,
+      "bytes": 3459640,
+      "records": 130784,
+      "snapshots": 1
+    },
+    {
+      "table": "silver.subscribers",
+      "files": 1,
+      "bytes": 15102,
+      "records": 2000,
+      "snapshots": 1
+    },
+    {
+      "table": "gold.cell_congestion_ranking",
+      "files": 1,
+      "bytes": 5450,
+      "records": 120,
+      "snapshots": 1
+    },
+    {
+      "table": "gold.cell_hourly_load",
+      "files": 7,
+      "bytes": 293766,
+      "records": 19377,
+      "snapshots": 2
+    },
+    {
+      "table": "gold.churn_features",
+      "files": 1,
+      "bytes": 60049,
+      "records": 2000,
+      "snapshots": 2
+    },
+    {
+      "table": "gold.daily_subscriber_usage",
+      "files": 7,
+      "bytes": 218759,
+      "records": 13865,
+      "snapshots": 2
+    },
+    {
+      "table": "ops.dq_results",
+      "files": 2,
+      "bytes": 6652,
+      "records": 40,
+      "snapshots": 2
+    },
+    {
+      "table": "ops.ingest_log",
+      "files": 20,
+      "bytes": 41024,
+      "records": 28,
+      "snapshots": 14
+    },
+    {
+      "table": "ops.silver_checkpoints",
+      "files": 14,
+      "bytes": 15647,
+      "records": 14,
+      "snapshots": 14
+    }
+  ]
+}

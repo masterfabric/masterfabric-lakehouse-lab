@@ -1,0 +1,7 @@
+{
+  "subscribers": 2000,
+  "churners": 490,
+  "base_rate": 0.245,
+  "roc_auc": 0.647,
+  "top_decile_lift": 1.9
+}

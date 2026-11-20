@@ -1,0 +1,148 @@
+{
+  "seconds": 3.721,
+  "rules": 20,
+  "passed": 20,
+  "failed": [],
+  "results": [
+    {
+      "rule": "cdr_record_id_not_null",
+      "kind": "completeness",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "cdr_record_id_unique",
+      "kind": "uniqueness",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "session_id_unique",
+      "kind": "uniqueness",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "subscriber_msisdn_unique",
+      "kind": "uniqueness",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "cell_id_unique",
+      "kind": "uniqueness",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "cdr_duration_non_negative",
+      "kind": "validity",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "cdr_msisdn_format",
+      "kind": "validity",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "session_volume_non_negative",
+      "kind": "validity",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "cell_utilization_plausible",
+      "kind": "validity",
+      "severity": "warn",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "cdr_subscriber_exists",
+      "kind": "integrity",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "cdr_cell_exists",
+      "kind": "integrity",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "session_cell_exists",
+      "kind": "integrity",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "bronze_cdr_rows_match_files",
+      "kind": "reconciliation",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "bronze_session_rows_match_files",
+      "kind": "reconciliation",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "cdr_every_record_accounted",
+      "kind": "reconciliation",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "sessions_every_record_accounted",
+      "kind": "reconciliation",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "duplicates_removed_exactly",
+      "kind": "reconciliation",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "bad_msisdn_quarantined_exactly",
+      "kind": "reconciliation",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "gold_minutes_match_silver",
+      "kind": "reconciliation",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    },
+    {
+      "rule": "cdr_has_every_day",
+      "kind": "freshness",
+      "severity": "error",
+      "value": 0.0,
+      "passed": true
+    }
+  ]
+}
