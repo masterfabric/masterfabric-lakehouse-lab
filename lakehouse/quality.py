@@ -81,7 +81,7 @@ def rules(manifest: dict) -> list[Rule]:
         Rule("duplicates_removed_exactly", "bronze.cdr_raw", "reconciliation",
              f"""SELECT abs((SELECT count(*) - count(DISTINCT record_id) FROM {L}.bronze.cdr_raw)
                     + (SELECT count(*) - count(DISTINCT session_id) FROM {L}.bronze.sessions_raw)
-                    - {inj['duplicates']})"""),
+                    - {inj['duplicates']} - {manifest.get('corrections', {}).get('resent_records', 0)})"""),
         Rule("bad_msisdn_quarantined_exactly", "silver.quarantine", "reconciliation",
              f"""SELECT abs(count(*) - {inj['bad_msisdn']}) FROM {L}.silver.quarantine
                  WHERE feed = 'cdr' AND reason = 'invalid_msisdn'"""),
