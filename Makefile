@@ -7,7 +7,7 @@ SCALE   ?= 1
 DAYS    ?= 7
 PY      ?= .venv/bin/python
 
-.PHONY: help env up down ps logs generate bronze silver gold quality demos scala pipeline \
+.PHONY: help env up down ps logs generate archive bronze silver gold quality demos scala pipeline \
         test test-unit test-spark bench trino-sql notebook screenshots assets clean-data reset
 
 help: ## Show targets
@@ -32,6 +32,11 @@ logs: ## Tail service logs
 
 generate: ## Generate synthetic raw feeds (SCALE=1 DAYS=7)
 	$(SPARK) python -m generator.telco_gen --out /landing --scale $(SCALE) --days $(DAYS)
+
+archive: ## Copy landing files to the s3://landing raw archive (immutable copy of what arrived)
+	docker run --rm --network mf-lakehouse_default --env-file .env -v $(CURDIR)/data/landing:/landing:ro --entrypoint sh amazon/aws-cli:latest \
+	  -c 'AWS_ACCESS_KEY_ID=$$LAKE_S3_ACCESS_KEY AWS_SECRET_ACCESS_KEY=$$LAKE_S3_SECRET_KEY AWS_DEFAULT_REGION=$$LAKE_S3_REGION aws --endpoint-url http://s3:9000 s3 sync --only-show-errors /landing s3://landing/raw/'
+	@echo "landing archived to s3://landing/raw/"
 
 bronze: ## Land raw files into bronze Iceberg tables (idempotent)
 	$(SUBMIT) lakehouse/bronze.py
@@ -77,7 +82,7 @@ screenshots: ## Capture UI screenshots with Playwright (stack must be up)
 	$(PY) scripts/screenshots.py
 
 assets: ## Render charts, diagrams and the hero image from real results
-	$(PY) scripts/make_charts.py && $(PY) scripts/make_hero.py
+	cd scripts && ../$(PY) make_diagrams.py && ../$(PY) make_charts.py && ../$(PY) make_hero.py
 
 clean-data: ## Delete generated landing files (not the lake)
 	rm -rf data/landing/*
