@@ -60,7 +60,7 @@ test-unit: ## Generator and helper tests (host Python)
 	$(PY) -m pytest -q tests/unit
 
 test-spark: ## Spark transformation tests (inside the Spark container, local mode)
-	$(SPARK) python -m pytest -q tests/spark
+	docker exec -w /lab -e PYTHONPATH=/lab:/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip mf-lake-spark python -m pytest -q -p no:cacheprovider tests/spark
 
 bench: ## Measure the pipeline at several scales and write docs/results
 	$(SPARK) python scripts/benchmark.py
