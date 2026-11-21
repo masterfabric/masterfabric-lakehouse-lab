@@ -99,6 +99,7 @@ lineage-down: ## Stop Marquez (keeps its volume)
 
 lineage: ## Purge, regenerate and run bronze -> silver -> gold -> quality with OpenLineage on
 	$(SUBMIT) lakehouse/admin.py purge
+	rm -rf data/landing/*
 	$(SPARK) python -m generator.telco_gen --out /landing --scale $(SCALE) --days $(DAYS)
 	for j in bronze silver gold quality; do docker exec -w /lab $(LRESULTS) mf-lake-spark spark-submit --driver-memory 3g $(LINEAGE) lakehouse/$$j.py || exit 1; done
 
