@@ -12,3 +12,5 @@ chosen, and what that choice costs. Format: lightweight [MADR](https://adr.githu
 | [0005](0005-gold-marts.md) | Gold marts rebuilt by atomic overwrite; panel weight; baseline churn score | Accepted |
 | [0006](0006-engines.md) | Spark for pipelines, Trino for interactive SQL | Accepted |
 | [0007](0007-table-maintenance.md) | Merge-on-read writes with scheduled compaction and snapshot expiry | Accepted |
+| [0008](0008-write-audit-publish.md) | Write-audit-publish on Iceberg branches, audited by Great Expectations | Accepted |
+| [0009](0009-openlineage.md) | Lineage from the Spark jobs with OpenLineage, stored in Marquez | Accepted |
