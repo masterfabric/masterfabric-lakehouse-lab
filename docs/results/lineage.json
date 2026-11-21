@@ -1,0 +1,580 @@
+{
+  "marquez": "http://localhost:15100",
+  "openlineage_spark": "1.55.0",
+  "applications": {
+    "bronze": [
+      "COMPLETED"
+    ],
+    "gold": [
+      "COMPLETED"
+    ],
+    "quality": [
+      "COMPLETED"
+    ],
+    "silver": [
+      "COMPLETED"
+    ],
+    "wap": [
+      "COMPLETED"
+    ]
+  },
+  "jobs_recorded": 54,
+  "datasets_recorded": 16,
+  "dataset_edges": [
+    {
+      "from": "landing/cdr",
+      "job": "bronze",
+      "to": "bronze/cdr_raw"
+    },
+    {
+      "from": "landing/cells",
+      "job": "bronze",
+      "to": "bronze/cells_raw"
+    },
+    {
+      "from": "landing/sessions",
+      "job": "bronze",
+      "to": "bronze/sessions_raw"
+    },
+    {
+      "from": "landing/subscribers",
+      "job": "bronze",
+      "to": "bronze/subscribers_raw"
+    },
+    {
+      "from": "silver/cdr",
+      "job": "gold",
+      "to": "gold/cell_hourly_load"
+    },
+    {
+      "from": "silver/cells",
+      "job": "gold",
+      "to": "gold/cell_hourly_load"
+    },
+    {
+      "from": "silver/sessions",
+      "job": "gold",
+      "to": "gold/cell_hourly_load"
+    },
+    {
+      "from": "gold/cell_hourly_load",
+      "job": "gold",
+      "to": "gold/churn_features"
+    },
+    {
+      "from": "gold/daily_subscriber_usage",
+      "job": "gold",
+      "to": "gold/churn_features"
+    },
+    {
+      "from": "silver/sessions",
+      "job": "gold",
+      "to": "gold/churn_features"
+    },
+    {
+      "from": "silver/subscribers",
+      "job": "gold",
+      "to": "gold/churn_features"
+    },
+    {
+      "from": "silver/cdr",
+      "job": "gold",
+      "to": "gold/daily_subscriber_usage"
+    },
+    {
+      "from": "silver/sessions",
+      "job": "gold",
+      "to": "gold/daily_subscriber_usage"
+    },
+    {
+      "from": "silver/subscribers",
+      "job": "gold",
+      "to": "gold/daily_subscriber_usage"
+    },
+    {
+      "from": "bronze/cdr_raw",
+      "job": "silver",
+      "to": "silver/cdr"
+    },
+    {
+      "from": "silver/cells",
+      "job": "silver",
+      "to": "silver/cdr"
+    },
+    {
+      "from": "silver/subscribers",
+      "job": "silver",
+      "to": "silver/cdr"
+    },
+    {
+      "from": "bronze/cells_raw",
+      "job": "silver",
+      "to": "silver/cells"
+    },
+    {
+      "from": "bronze/sessions_raw",
+      "job": "silver",
+      "to": "silver/sessions"
+    },
+    {
+      "from": "silver/cells",
+      "job": "silver",
+      "to": "silver/sessions"
+    },
+    {
+      "from": "silver/subscribers",
+      "job": "silver",
+      "to": "silver/sessions"
+    },
+    {
+      "from": "bronze/subscribers_raw",
+      "job": "silver",
+      "to": "silver/subscribers"
+    },
+    {
+      "from": "silver/cdr",
+      "job": "wap",
+      "to": "silver/cdr_schema_lab"
+    }
+  ],
+  "column_lineage": {
+    "bronze/cells_raw": {
+      "capacity_sessions": [
+        "/landing/cells/cells_2026-10-01.csv.gz.capacity_sessions"
+      ],
+      "cell_id": [
+        "/landing/cells/cells_2026-10-01.csv.gz.cell_id"
+      ],
+      "city": [
+        "/landing/cells/cells_2026-10-01.csv.gz.city"
+      ],
+      "band_mhz": [
+        "/landing/cells/cells_2026-10-01.csv.gz.band_mhz"
+      ],
+      "longitude": [
+        "/landing/cells/cells_2026-10-01.csv.gz.longitude"
+      ],
+      "commissioned_on": [
+        "/landing/cells/cells_2026-10-01.csv.gz.commissioned_on"
+      ],
+      "site_id": [
+        "/landing/cells/cells_2026-10-01.csv.gz.site_id"
+      ],
+      "latitude": [
+        "/landing/cells/cells_2026-10-01.csv.gz.latitude"
+      ],
+      "technology": [
+        "/landing/cells/cells_2026-10-01.csv.gz.technology"
+      ]
+    },
+    "bronze/subscribers_raw": {
+      "activation_date": [
+        "/landing/subscribers/subscribers_2026-10-01.csv.gz.activation_date"
+      ],
+      "subscriber_id": [
+        "/landing/subscribers/subscribers_2026-10-01.csv.gz.subscriber_id"
+      ],
+      "segment": [
+        "/landing/subscribers/subscribers_2026-10-01.csv.gz.segment"
+      ],
+      "device_type": [
+        "/landing/subscribers/subscribers_2026-10-01.csv.gz.device_type"
+      ],
+      "home_city": [
+        "/landing/subscribers/subscribers_2026-10-01.csv.gz.home_city"
+      ],
+      "birth_year": [
+        "/landing/subscribers/subscribers_2026-10-01.csv.gz.birth_year"
+      ],
+      "plan_id": [
+        "/landing/subscribers/subscribers_2026-10-01.csv.gz.plan_id"
+      ],
+      "msisdn": [
+        "/landing/subscribers/subscribers_2026-10-01.csv.gz.msisdn"
+      ]
+    },
+    "gold/cell_hourly_load": {
+      "is_congested": [
+        "silver/cells.capacity_sessions",
+        "silver/sessions.duration_s"
+      ],
+      "hour_ts": [
+        "silver/cdr.event_time",
+        "silver/sessions.start_time"
+      ],
+      "est_concurrent_sessions": [
+        "silver/sessions.duration_s"
+      ],
+      "dropped_calls": [
+        "silver/cdr.is_dropped"
+      ],
+      "technology": [
+        "silver/cells.technology"
+      ],
+      "city": [
+        "silver/cells.city"
+      ],
+      "capacity_sessions": [
+        "silver/cells.capacity_sessions"
+      ],
+      "data_mb": [
+        "silver/sessions.bytes_down",
+        "silver/sessions.bytes_up"
+      ],
+      "utilization": [
+        "silver/cells.capacity_sessions",
+        "silver/sessions.duration_s"
+      ],
+      "cell_id": [
+        "silver/cells.cell_id"
+      ],
+      "voice_calls": [
+        "silver/cdr.event_type"
+      ]
+    },
+    "gold/churn_features": {
+      "subscriber_id": [
+        "silver/subscribers.subscriber_id"
+      ],
+      "device_type": [
+        "silver/subscribers.device_type"
+      ],
+      "drop_rate": [
+        "gold/daily_subscriber_usage.dropped_calls",
+        "gold/daily_subscriber_usage.voice_calls"
+      ],
+      "tenure_days": [
+        "silver/subscribers.activation_date"
+      ],
+      "avg_throughput_kbps": [
+        "silver/sessions.avg_throughput_kbps"
+      ],
+      "segment": [
+        "silver/subscribers.segment"
+      ],
+      "plan_id": [
+        "silver/subscribers.plan_id"
+      ],
+      "churn_risk_score": [
+        "gold/daily_subscriber_usage.data_mb",
+        "gold/daily_subscriber_usage.data_sessions",
+        "gold/daily_subscriber_usage.dropped_calls",
+        "gold/daily_subscriber_usage.event_date",
+        "gold/daily_subscriber_usage.sms",
+        "gold/daily_subscriber_usage.voice_calls",
+        "gold/daily_subscriber_usage.voice_minutes",
+        "silver/subscribers.activation_date",
+        "silver/subscribers.segment"
+      ],
+      "voice_minutes": [
+        "gold/daily_subscriber_usage.voice_minutes"
+      ],
+      "data_mb": [
+        "gold/daily_subscriber_usage.data_mb"
+      ],
+      "active_days": [
+        "gold/daily_subscriber_usage.data_sessions",
+        "gold/daily_subscriber_usage.sms",
+        "gold/daily_subscriber_usage.voice_calls"
+      ],
+      "usage_trend": [
+        "gold/daily_subscriber_usage.data_mb",
+        "gold/daily_subscriber_usage.event_date",
+        "gold/daily_subscriber_usage.voice_minutes"
+      ]
+    },
+    "gold/daily_subscriber_usage": {
+      "voice_minutes": [
+        "silver/cdr.duration_s",
+        "silver/cdr.event_type"
+      ],
+      "plan_id": [
+        "silver/subscribers.plan_id"
+      ],
+      "data_mb": [
+        "silver/sessions.bytes_down",
+        "silver/sessions.bytes_up"
+      ],
+      "subscriber_id": [
+        "silver/subscribers.subscriber_id"
+      ],
+      "dropped_calls": [
+        "silver/cdr.is_dropped"
+      ],
+      "segment": [
+        "silver/subscribers.segment"
+      ],
+      "voice_calls": [
+        "silver/cdr.event_type"
+      ],
+      "charge_try": [
+        "silver/cdr.charge_try"
+      ],
+      "home_city": [
+        "silver/subscribers.home_city"
+      ],
+      "sms": [
+        "silver/cdr.event_type"
+      ],
+      "event_date": [
+        "silver/cdr.event_time",
+        "silver/sessions.start_time"
+      ]
+    },
+    "silver/cdr": {
+      "cell_id": [
+        "bronze/cdr_raw.cell_id",
+        "silver/cdr.cell_id"
+      ],
+      "event_type": [
+        "bronze/cdr_raw.event_type",
+        "silver/cdr.event_type"
+      ],
+      "_ingested_at": [
+        "bronze/cdr_raw._ingested_at",
+        "silver/cdr._ingested_at"
+      ],
+      "called_msisdn": [
+        "bronze/cdr_raw.called_msisdn",
+        "silver/cdr.called_msisdn"
+      ],
+      "is_dropped": [
+        "bronze/cdr_raw.termination",
+        "silver/cdr.is_dropped"
+      ],
+      "calling_msisdn": [
+        "bronze/cdr_raw.calling_msisdn",
+        "silver/cdr.calling_msisdn"
+      ],
+      "event_time": [
+        "bronze/cdr_raw.start_time",
+        "silver/cdr.event_time"
+      ],
+      "duration_s": [
+        "bronze/cdr_raw.duration_s",
+        "silver/cdr.duration_s"
+      ],
+      "_source_file": [
+        "bronze/cdr_raw._source_file",
+        "silver/cdr._source_file"
+      ],
+      "is_roaming": [
+        "bronze/cdr_raw.roaming",
+        "silver/cdr.is_roaming"
+      ],
+      "subscriber_id": [
+        "silver/cdr.subscriber_id",
+        "silver/subscribers.subscriber_id"
+      ],
+      "charge_try": [
+        "bronze/cdr_raw.charge_try",
+        "silver/cdr.charge_try"
+      ],
+      "record_id": [
+        "bronze/cdr_raw.record_id",
+        "silver/cdr.record_id"
+      ],
+      "city": [
+        "silver/cdr.city",
+        "silver/cells.city"
+      ]
+    },
+    "silver/cdr_schema_lab": {
+      "duration_s": [
+        "silver/cdr.duration_s"
+      ],
+      "_ingested_at": [
+        "silver/cdr._ingested_at"
+      ],
+      "is_dropped": [
+        "silver/cdr.is_dropped"
+      ],
+      "calling_msisdn": [
+        "silver/cdr.calling_msisdn"
+      ],
+      "_source_file": [
+        "silver/cdr._source_file"
+      ],
+      "called_msisdn": [
+        "silver/cdr.called_msisdn"
+      ],
+      "charge_try": [
+        "silver/cdr.charge_try"
+      ],
+      "event_time": [
+        "silver/cdr.event_time"
+      ],
+      "cell_id": [
+        "silver/cdr.cell_id"
+      ],
+      "is_roaming": [
+        "silver/cdr.is_roaming"
+      ],
+      "city": [
+        "silver/cdr.city"
+      ],
+      "call_dropped": [
+        "silver/cdr.is_dropped"
+      ],
+      "record_id": [
+        "silver/cdr.record_id"
+      ],
+      "subscriber_id": [
+        "silver/cdr.subscriber_id"
+      ],
+      "event_type": [
+        "silver/cdr.event_type"
+      ]
+    },
+    "silver/cells": {
+      "longitude": [
+        "bronze/cells_raw.longitude",
+        "silver/cells.longitude"
+      ],
+      "city": [
+        "bronze/cells_raw.city",
+        "silver/cells.city"
+      ],
+      "commissioned_on": [
+        "bronze/cells_raw.commissioned_on",
+        "silver/cells.commissioned_on"
+      ],
+      "latitude": [
+        "bronze/cells_raw.latitude",
+        "silver/cells.latitude"
+      ],
+      "cell_id": [
+        "bronze/cells_raw.cell_id",
+        "silver/cells.cell_id"
+      ],
+      "capacity_sessions": [
+        "bronze/cells_raw.capacity_sessions",
+        "silver/cells.capacity_sessions"
+      ],
+      "updated_at": [
+        "silver/cells.updated_at"
+      ],
+      "band_mhz": [
+        "bronze/cells_raw.band_mhz",
+        "silver/cells.band_mhz"
+      ],
+      "site_id": [
+        "bronze/cells_raw.site_id",
+        "silver/cells.site_id"
+      ],
+      "technology": [
+        "bronze/cells_raw.technology",
+        "silver/cells.technology"
+      ]
+    },
+    "silver/sessions": {
+      "cell_id": [
+        "bronze/sessions_raw.cell_id",
+        "silver/sessions.cell_id"
+      ],
+      "_source_file": [
+        "bronze/sessions_raw._source_file",
+        "silver/sessions._source_file"
+      ],
+      "start_time": [
+        "bronze/sessions_raw.start",
+        "silver/sessions.start_time"
+      ],
+      "_ingested_at": [
+        "bronze/sessions_raw._ingested_at",
+        "silver/sessions._ingested_at"
+      ],
+      "duration_s": [
+        "bronze/sessions_raw.duration_s",
+        "silver/sessions.duration_s"
+      ],
+      "session_id": [
+        "bronze/sessions_raw.session_id",
+        "silver/sessions.session_id"
+      ],
+      "city": [
+        "silver/cells.city",
+        "silver/sessions.city"
+      ],
+      "subscriber_id": [
+        "silver/sessions.subscriber_id",
+        "silver/subscribers.subscriber_id"
+      ],
+      "app_category": [
+        "bronze/sessions_raw.app_category",
+        "silver/sessions.app_category"
+      ],
+      "bytes_down": [
+        "bronze/sessions_raw.bytes_down",
+        "silver/sessions.bytes_down"
+      ],
+      "rat": [
+        "bronze/sessions_raw.rat",
+        "silver/sessions.rat"
+      ],
+      "avg_throughput_kbps": [
+        "bronze/sessions_raw.avg_throughput_kbps",
+        "silver/sessions.avg_throughput_kbps"
+      ],
+      "bytes_up": [
+        "bronze/sessions_raw.bytes_up",
+        "silver/sessions.bytes_up"
+      ],
+      "msisdn": [
+        "bronze/sessions_raw.msisdn",
+        "silver/sessions.msisdn"
+      ]
+    },
+    "silver/subscribers": {
+      "subscriber_id": [
+        "bronze/subscribers_raw.subscriber_id",
+        "silver/subscribers.subscriber_id"
+      ],
+      "plan_id": [
+        "bronze/subscribers_raw.plan_id",
+        "silver/subscribers.plan_id"
+      ],
+      "msisdn": [
+        "bronze/subscribers_raw.msisdn",
+        "silver/subscribers.msisdn"
+      ],
+      "birth_year": [
+        "bronze/subscribers_raw.birth_year",
+        "silver/subscribers.birth_year"
+      ],
+      "updated_at": [
+        "silver/subscribers.updated_at"
+      ],
+      "activation_date": [
+        "bronze/subscribers_raw.activation_date",
+        "silver/subscribers.activation_date"
+      ],
+      "home_city": [
+        "bronze/subscribers_raw.home_city",
+        "silver/subscribers.home_city"
+      ],
+      "device_type": [
+        "bronze/subscribers_raw.device_type",
+        "silver/subscribers.device_type"
+      ],
+      "segment": [
+        "bronze/subscribers_raw.segment",
+        "silver/subscribers.segment"
+      ]
+    }
+  },
+  "trace": {
+    "gold/daily_subscriber_usage.charge_try": [
+      "bronze/cdr_raw:charge_try",
+      "silver/cdr:charge_try"
+    ],
+    "gold/churn_features.drop_rate": [
+      "bronze/cdr_raw:event_type",
+      "bronze/cdr_raw:termination",
+      "gold/daily_subscriber_usage:dropped_calls",
+      "gold/daily_subscriber_usage:voice_calls",
+      "silver/cdr:event_type",
+      "silver/cdr:is_dropped"
+    ]
+  }
+}
