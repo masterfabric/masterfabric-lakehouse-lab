@@ -78,6 +78,26 @@ bug found during the gold step is fixed in its own commit (`2d5de7c`) rather tha
 | 02:12 | [`adb9549`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/adb9549) | docs(readme): write the full README with architecture, walkthrough and results | Complete README. |
 | 02:12 | [`13e4041`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/13e4041) | docs: add contributing guide | Contributing guide. |
 
+## Addition: write-audit-publish, data quality and lineage (later the same day)
+
+| Time | Commit | Change | Why |
+|---|---|---|---|
+| 09:18 | [`bf73a49`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/bf73a49) | build(spark): add Great Expectations and the OpenLineage Spark listener | Great Expectations 1.25.0 (Apache-2.0) validates Spark DataFrames for the write-audit-publish gate. |
+| 09:23 | [`a07148f`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/a07148f) | feat(lineage): Marquez as an optional OpenLineage backend | A 'lineage' compose profile adds Marquez 0.51.1 (API on 127.0.0.1:15100, UI on 127.0.0.1:13100) with its own Postgres. |
+| 09:27 | [`6708406`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/6708406) | fix(make): clear old landing files before the lineage run regenerates them | Correction files left by an earlier demo run were ingested again and failed three reconciliation rules. |
+| 09:30 | [`58cc38e`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/58cc38e) | feat(quality): Great Expectations gate for a batch of silver CDRs | Eleven expectations: the silver contract (keys unique and present, MSISDN format, duration range, known event types, city present) plus volume and charge rules learned from the published main branch, so a well-formed batch with half the rows or charges in kuruş still fails. |
+| 09:30 | [`bfa70cf`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/bfa70cf) | feat(iceberg): write-audit-publish on branches, rollback, and schema evolution via tags | A new day is written to an audit branch with spark.wap.branch, validated with the Great Expectations gate and published with fast_forward only if it passes. |
+| 09:30 | [`d01579a`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/d01579a) | test: Great Expectations gate and the Iceberg branch, tag and rollback behaviour | Six Spark tests on an isolated file catalog: a normal batch passes all 11 expectations, the kuruş and lost-city bug fails exactly three, a half delivery fails only the volume rule; a branch write stays invisible until fast_forward, a tag reads the old values after a column is dropped and re-added, and rollback restores deleted rows. |
+| 09:31 | [`7dd00b0`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/7dd00b0) | feat(lineage): export the Marquez lineage graph to docs/results/lineage.json | From the OpenLineage events of one pipeline run plus the write-audit-publish job: 54 jobs and 16 datasets recorded, collapsed to 23 dataset edges across the five Spark applications, column lineage for 10 datasets, and two gold columns traced upstream. |
+| 09:33 | [`47fb9a6`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/47fb9a6) | docs: Marquez lineage and Great Expectations Data Docs screenshots | Captured from the running stack with Playwright: the table-level lineage graph of gold.daily_subscriber_usage in Marquez, the Data Docs index, and the failed validation of the buggy delivery filtered to its three failed expectations. |
+| 09:34 | [`4e67015`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/4e67015) | docs: images for write-audit-publish, the expectation results and lineage | Rendered from docs/results/wap.json and lineage.json: the branch, audit, publish and rollback flow with measured counts and times; all 11 expectations for both deliveries with observed values; and the dataset lineage OpenLineage recorded, laid out by layer. |
+| 09:35 | [`ca74f48`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/ca74f48) | docs(notice): list the new lineage and data-quality components | Adds Great Expectations, the OpenLineage Spark listener, Marquez (all Apache-2.0) and PostgreSQL (PostgreSQL License), all compatible with distributing this project under AGPL-3.0. |
+| 09:35 | [`b39e185`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/b39e185) | docs(adr): 0008 write-audit-publish on Iceberg branches | Why branches beat staging tables and pre-write validation, the 8 contract plus 3 learned expectations, the measured outcome (11/11 published in 0.061 s; 8/11 blocked; rollback in 0.057 s), and the cache pitfall that first let the buggy delivery through. |
+| 09:36 | [`385ddbc`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/385ddbc) | docs(adr): 0009 lineage with OpenLineage and Marquez | Runtime lineage from Spark plans instead of documentation or SQL parsing; 54 jobs and 16 datasets recorded, 23 dataset edges, column lineage on 10 datasets, and where it stops (CDR column lineage ends at bronze, branches are not separate datasets). |
+| 09:37 | [`574314b`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/574314b) | results: write-audit-publish and schema evolution run | Release 2.3 delivery: 14,684 rows, 11/11 expectations, published by fast_forward in 0.061 s (main 123,689 -> 138,373). |
+| 09:37 | [`7f61f64`](https://github.com/masterfabric/masterfabric-lakehouse-lab/commit/7f61f64) | docs: README section on write-audit-publish, the Great Expectations gate and lineage | Mermaid sequence of the branch audit, the measured WAP and rollback table, the expectation grid and Data Docs capture, schema evolution read back through a tag, and the OpenLineage/Marquez lineage with the exported graph and a UI capture. |
+| (this commit) | | docs: build timeline for the lineage, quality and WAP addition | Keeps the build history complete. |
+
 ## Verification at each stage
 
 | Stage | What was run | Result |
@@ -91,4 +111,6 @@ bug found during the gold step is fixed in its own commit (`2d5de7c`) rather tha
 | tests | `make test` | 8 + 6 passed |
 | benchmark | `make bench` | scales 1, 2, 4, 8 all 20/20; 32.4 s to 68.6 s |
 | assets | `make trino-sql notebook screenshots assets` | every image regenerated from results |
-
+| lineage run | `make lineage-up lineage` | 20/20 quality rules with OpenLineage on; 54 jobs, 16 datasets in Marquez |
+| WAP | `make wap` | 2.3 delivery 11/11 published; 2.4 delivery 8/11 blocked; rollback restores 138,373 rows |
+| tests | `make test` | 8 + 12 passed |
