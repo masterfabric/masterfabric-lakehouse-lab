@@ -1,0 +1,320 @@
+{
+  "table": "silver.cdr",
+  "baseline_from_main": {
+    "rows_per_day": 17669.85714285714,
+    "avg_charge": 1.2210677263371603,
+    "max_charge": 58.58
+  },
+  "event_types": [
+    "SMS",
+    "VOICE"
+  ],
+  "tag_before_wap": {
+    "name": "before_wap",
+    "rows": 123689
+  },
+  "good_delivery": {
+    "branch": "audit_20261008_a",
+    "release": "2.3",
+    "main_before": 123689,
+    "write_s": 0.678,
+    "branch_rows_new_day": 14684,
+    "main_rows_new_day_while_auditing": 0,
+    "audit_s": 1.643,
+    "audit": {
+      "success": true,
+      "evaluated": 11,
+      "passed": 11,
+      "results": [
+        {
+          "expectation": "expect_column_values_to_not_be_null",
+          "kwargs": {
+            "column": "record_id"
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_column_values_to_be_unique",
+          "kwargs": {
+            "column": "record_id"
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_column_values_to_not_be_null",
+          "kwargs": {
+            "column": "event_time"
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_column_values_to_not_be_null",
+          "kwargs": {
+            "column": "subscriber_id"
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_column_values_to_not_be_null",
+          "kwargs": {
+            "column": "city"
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_column_values_to_match_regex",
+          "kwargs": {
+            "column": "calling_msisdn",
+            "regex": "^905\\d{9}$"
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_column_values_to_be_between",
+          "kwargs": {
+            "column": "duration_s",
+            "min_value": 0.0,
+            "max_value": 86400.0
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_column_values_to_be_in_set",
+          "kwargs": {
+            "column": "event_type",
+            "value_set": [
+              "SMS",
+              "VOICE"
+            ]
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_table_row_count_to_be_between",
+          "kwargs": {
+            "min_value": 8834,
+            "max_value": 26504
+          },
+          "success": true,
+          "observed": 14684,
+          "unexpected_percent": null
+        },
+        {
+          "expectation": "expect_column_values_to_be_between",
+          "kwargs": {
+            "column": "charge_try",
+            "min_value": 0.0,
+            "max_value": 117.16
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_column_mean_to_be_between",
+          "kwargs": {
+            "column": "charge_try",
+            "min_value": 0.8547,
+            "max_value": 1.5874
+          },
+          "success": true,
+          "observed": 1.224047262326344,
+          "unexpected_percent": null
+        }
+      ]
+    },
+    "publish_s": 0.061,
+    "published": true,
+    "main_after": 138373,
+    "main_rows_new_day_after": 14684
+  },
+  "buggy_delivery": {
+    "branch": "audit_20261008_b",
+    "release": "2.4 (buggy)",
+    "main_before": 138373,
+    "write_s": 0.372,
+    "branch_rows_new_day": 29368,
+    "main_rows_new_day_while_auditing": 14684,
+    "audit_s": 1.044,
+    "audit": {
+      "success": false,
+      "evaluated": 11,
+      "passed": 8,
+      "results": [
+        {
+          "expectation": "expect_column_values_to_not_be_null",
+          "kwargs": {
+            "column": "record_id"
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_column_values_to_be_unique",
+          "kwargs": {
+            "column": "record_id"
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_column_values_to_not_be_null",
+          "kwargs": {
+            "column": "event_time"
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_column_values_to_not_be_null",
+          "kwargs": {
+            "column": "subscriber_id"
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_column_values_to_not_be_null",
+          "kwargs": {
+            "column": "city"
+          },
+          "success": false,
+          "observed": 14684,
+          "unexpected_percent": 100.0
+        },
+        {
+          "expectation": "expect_column_values_to_match_regex",
+          "kwargs": {
+            "column": "calling_msisdn",
+            "regex": "^905\\d{9}$"
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_column_values_to_be_between",
+          "kwargs": {
+            "column": "duration_s",
+            "min_value": 0.0,
+            "max_value": 86400.0
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_column_values_to_be_in_set",
+          "kwargs": {
+            "column": "event_type",
+            "value_set": [
+              "SMS",
+              "VOICE"
+            ]
+          },
+          "success": true,
+          "observed": 0,
+          "unexpected_percent": 0.0
+        },
+        {
+          "expectation": "expect_table_row_count_to_be_between",
+          "kwargs": {
+            "min_value": 8834,
+            "max_value": 26504
+          },
+          "success": true,
+          "observed": 14684,
+          "unexpected_percent": null
+        },
+        {
+          "expectation": "expect_column_values_to_be_between",
+          "kwargs": {
+            "column": "charge_try",
+            "min_value": 0.0,
+            "max_value": 117.16
+          },
+          "success": false,
+          "observed": 4911,
+          "unexpected_percent": 33.444565513484065
+        },
+        {
+          "expectation": "expect_column_mean_to_be_between",
+          "kwargs": {
+            "column": "charge_try",
+            "min_value": 0.8547,
+            "max_value": 1.5874
+          },
+          "success": false,
+          "observed": 122.40472623263416,
+          "unexpected_percent": null
+        }
+      ]
+    },
+    "published": false,
+    "main_after": 138373,
+    "main_rows_new_day_after": 14684
+  },
+  "buggy_branch_kept_for_debugging": {
+    "rows_new_day": 29368,
+    "null_city": 14684
+  },
+  "rollback": {
+    "rows_before": 138373,
+    "rows_after_accidental_delete": 123689,
+    "rows_after_rollback": 138373,
+    "rollback_s": 0.057,
+    "tag": "published_20261008"
+  },
+  "refs": [
+    {
+      "name": "audit_20261008_a",
+      "type": "BRANCH",
+      "snapshot_id": 5704666836309477239
+    },
+    {
+      "name": "audit_20261008_b",
+      "type": "BRANCH",
+      "snapshot_id": 4928877628348123364
+    },
+    {
+      "name": "main",
+      "type": "BRANCH",
+      "snapshot_id": 5704666836309477239
+    },
+    {
+      "name": "before_wap",
+      "type": "TAG",
+      "snapshot_id": 5586148076733517811
+    },
+    {
+      "name": "published_20261008",
+      "type": "TAG",
+      "snapshot_id": 5704666836309477239
+    }
+  ],
+  "files_main": {
+    "files": 2,
+    "bytes": 2314399,
+    "records": 138373
+  }
+}
