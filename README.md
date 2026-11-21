@@ -15,8 +15,10 @@ Apple M4 Pro.
 | **Table format** | Apache Iceberg v2 · REST catalog |
 | **Processing** | Spark 3.5.5 (PySpark + one Scala job) · medallion bronze → silver → gold |
 | **Interactive SQL** | Trino 475 on the same catalog (the Impala role) |
-| **Quality** | 20-rule gate with reconciliation against the producer's manifest |
-| **Proof** | 14 tests · scale benchmark 0.26 M → 2.1 M rows · screenshots and charts from real runs |
+| **Quality** | 20-rule gate with reconciliation against the producer's manifest · Great Expectations audit before publish |
+| **Publishing** | write-audit-publish on Iceberg branches, tags and rollback |
+| **Lineage** | OpenLineage from every Spark job into Marquez, down to column level |
+| **Proof** | 20 tests · scale benchmark 0.26 M → 2.1 M rows · screenshots and charts from real runs |
 
 > First of a series of MasterFabric data and AI platform repositories. This one covers the
 > lakehouse and big data processing layer; streaming, MLOps and on-prem LLM serving follow in
@@ -26,6 +28,7 @@ Apple M4 Pro.
 
 [Why](#why-this-lab-exists) · [Architecture](#architecture) · [Quickstart](#quickstart) ·
 [Pipeline walkthrough](#pipeline-walkthrough) · [Iceberg features](#iceberg-features-on-real-tables) ·
+[Write-audit-publish, quality and lineage](#write-audit-publish-data-quality-and-lineage) ·
 [Trino](#interactive-sql-with-trino) · [Measured results](#measured-results) ·
 [Screenshots](#screenshots) · [Cloudera mapping](#mapping-to-a-cloudera-cdp-estate) ·
 [Decisions](#design-decisions) · [Data model](#data-model) · [Limitations](#limitations) ·
@@ -124,7 +127,7 @@ make pipeline      # generate → bronze → silver → gold → quality   (~35 
 make demos         # Iceberg: evolution, late corrections, time travel, maintenance
 make gold quality  # rebuild marts after the corrections and re-run the gate
 make scala         # Scala ranking job
-make test          # 8 unit tests on the host + 6 Spark/Iceberg tests in the container
+make test          # 8 unit tests on the host + 12 Spark/Iceberg tests in the container
 ```
 
 | Service | URL | Notes |
@@ -138,6 +141,16 @@ make test          # 8 unit tests on the host + 6 Spark/Iceberg tests in the con
 
 Bigger data: `make pipeline SCALE=4` (8,000 subscribers, ~1 M raw rows). Full benchmark:
 `make bench` (scales 1, 2, 4, 8, then restores the scale-1 demo state). Start over: `make reset`.
+
+Lineage, data quality and write-audit-publish (optional `lineage` profile, see
+[below](#write-audit-publish-data-quality-and-lineage)):
+
+```bash
+make lineage-up    # Marquez API on 127.0.0.1:15100, UI on http://127.0.0.1:13100
+make lineage       # purge, regenerate, bronze → silver → gold → quality with OpenLineage on
+make wap           # branch → Great Expectations audit → publish or block; rollback; schema evolution
+make lineage-export
+```
 
 Optional host tooling for charts, screenshots and Trino scripts:
 
@@ -309,6 +322,114 @@ referenced, **0 orphans**. (Iceberg's own `remove_orphan_files` needs a Hadoop `
 connector the image does not ship, and it rightly refuses intervals under 24 hours; see
 [ADR 0007](docs/adr/0007-table-maintenance.md).)
 
+## Write-audit-publish, data quality and lineage
+
+The quality gate above stops gold from being rebuilt, but by then silver already holds the bad
+rows. This section moves the check in front of publication, makes it catch release bugs that
+produce well-formed rows, and records lineage from the jobs themselves. Code:
+[`lakehouse/wap.py`](lakehouse/wap.py), [`lakehouse/expectations.py`](lakehouse/expectations.py),
+[`scripts/lineage_export.py`](scripts/lineage_export.py). Results:
+[`wap.json`](docs/results/wap.json), [`schema_evolution.json`](docs/results/schema_evolution.json),
+[`lineage.json`](docs/results/lineage.json). Decisions: [ADR 0008](docs/adr/0008-write-audit-publish.md),
+[ADR 0009](docs/adr/0009-openlineage.md).
+
+```mermaid
+sequenceDiagram
+  participant J as Spark job
+  participant B as silver.cdr @ audit branch
+  participant G as Great Expectations
+  participant M as silver.cdr @ main
+  participant T as Trino / analysts
+  J->>B: append delivery (spark.wap.branch)
+  Note over M,T: main unchanged, readers see nothing new
+  B->>G: validate this delivery (11 expectations)
+  alt all pass
+    G->>M: CALL fast_forward(main, branch)
+    M->>T: new day visible
+  else any fail
+    G-->>B: keep branch for debugging
+  end
+```
+
+### Write-audit-publish on Iceberg branches
+
+<p align="center"><img src="docs/images/wap_flow.png" alt="Branch, audit, publish and rollback flow with measured row counts and times" width="100%"></p>
+<p align="center"><em>One measured run. A delivery from release 2.3 is published; one from release 2.4, which writes
+charges in kuruş and loses the city join, is blocked; an accidental delete on main is rolled back.</em></p>
+
+| Step | Release 2.3 | Release 2.4 (buggy) |
+|---|---:|---:|
+| Rows written to the audit branch | 14,684 | 14,684 |
+| New rows visible on `main` during the audit | 0 | 0 |
+| Write to branch | 0.678 s | 0.372 s |
+| Great Expectations audit | 11/11 pass, 1.643 s | 8/11 pass, 1.044 s |
+| Publish (`fast_forward`) | 0.061 s | not published |
+| `main` afterwards | 138,373 rows | 138,373 rows |
+
+Rollback: a direct `DELETE` of the new day on `main` took it from 138,373 to
+123,689 rows; `rollback_to_snapshot` to the `published_20261008` tag restored
+138,373 rows in 0.057 s, a metadata-only commit.
+
+One finding worth knowing: in the first version, the second audit silently re-validated the
+first branch's rows and the buggy delivery was published. Spark's cache matched Iceberg scans of
+two different branches as the same plan, and Great Expectations persists its batch. The job now
+clears the cache and selects the delivery by source file; `tests/spark/test_expectations.py`
+covers the failing case.
+
+### The Great Expectations gate
+
+<p align="center"><img src="docs/images/gx_results.png" alt="Pass and fail grid for the 11 expectations on both deliveries" width="100%"></p>
+<p align="center"><em>Eight contract expectations and three learned from main (rows per day ±50 %, charge maximum below
+2× the historical maximum, mean charge ±30 %). Every row of the buggy delivery is well-formed; the city
+rule and the two learned charge rules catch it.</em></p>
+
+Learned baseline from `main`: 17,670 rows per day, mean
+charge 1.221 TRY, maximum 58.58 TRY. The buggy delivery's
+mean charge was 122.4 TRY, 33.4 % of its rows were above the maximum,
+and 100 % had no city.
+
+<p align="center"><img src="docs/screenshots/gx_failed_validation.png" alt="Great Expectations Data Docs page for the failed validation" width="85%"></p>
+<p align="center"><em>Great Expectations Data Docs for the blocked delivery, filtered to the three failed expectations
+with sampled unexpected values.</em></p>
+
+### Schema evolution read back through time travel
+
+On a copy of `silver.cdr` tagged `schema_v1`, five DDL changes ran in 0.151 s:
+
+```sql
+ALTER TABLE t ADD COLUMN network_slice STRING AFTER cell_id;
+ALTER TABLE t ALTER COLUMN charge_try TYPE DECIMAL(12,2);     -- precision widening
+ALTER TABLE t RENAME COLUMN is_dropped TO call_dropped;
+ALTER TABLE t DROP COLUMN is_roaming;
+ALTER TABLE t ADD COLUMN is_roaming BOOLEAN;                  -- same name, new column id
+```
+
+| Check | Result |
+|---|---:|
+| Data files rewritten by the DDL | 0 of 1 |
+| Roaming CDRs (`is_roaming = true`) at `schema_v1` | 1,243 |
+| Same query through `VERSION AS OF 'schema_v1'` after the drop and re-add | 1,243 |
+| Old rows with a non-null `is_roaming` in the current schema | 0 |
+| New day written with the new schema: rows with `is_roaming` / `network_slice` set | 14,684 / 14,684 |
+
+Reading the tag returns the old column names (`is_dropped`, the original `is_roaming`) and values,
+while the re-added `is_roaming` does not resurrect old data: Iceberg tracks columns by id, not name.
+
+### Lineage with OpenLineage and Marquez
+
+<p align="center"><img src="docs/images/lineage_graph.png" alt="Dataset lineage from landing folders through bronze and silver to gold, coloured by job" width="100%"></p>
+<p align="center"><em>Exported from Marquez after one pipeline run plus the write-audit-publish job: 54 jobs and
+16 datasets recorded, collapsed to 23 dataset edges across the Spark applications.</em></p>
+
+The OpenLineage Spark listener 1.55.0 sends run, job, dataset and column-lineage events to
+Marquez 0.51.1. Column lineage is recorded for 10 datasets; for example
+`gold.churn_features.drop_rate` traces back to `silver.cdr.event_type`, `silver.cdr.is_dropped`
+and `bronze.cdr_raw.termination`.
+
+<p align="center"><img src="docs/screenshots/marquez_lineage_gold.png" alt="Marquez UI showing the lineage graph of gold.daily_subscriber_usage" width="100%"></p>
+<p align="center"><em>The Marquez UI on the same run: table-level lineage of <code>gold.daily_subscriber_usage</code>, with every
+Spark action as a job node and each dataset's columns.</em></p>
+
 ## Interactive SQL with Trino
 
 `make trino-sql` runs seven analyst queries through Trino on the tables Spark built. Warm
@@ -374,7 +495,8 @@ platform uses; only the infrastructure underneath changes.
 | Catalog | Iceberg REST | Hive Metastore with Ranger and Atlas | `spark.sql.catalog.lake.type=hive` and its URI |
 | Pipelines | Spark `local[4]` in a container | Spark on YARN, or Cloudera Data Engineering | `--master yarn`, executor sizing, Kerberos principal |
 | Interactive SQL | Trino | Impala (Data Warehouse service or Base) | SQL dialect details (`FOR VERSION AS OF` → `FOR SYSTEM_VERSION AS OF` in Impala) |
-| Quality and lineage | quality gate + `ops.*` tables | the same gate, plus Atlas lineage and Ranger audit | publish `ops.dq_results` to the observability stack |
+| Quality and lineage | quality gate + `ops.*` tables · Great Expectations audit · OpenLineage → Marquez | the same gate and audit, Atlas lineage (Spark hook) or any OpenLineage backend, Ranger audit | transport URL for lineage; publish `ops.dq_results` to the observability stack |
+| Publishing | Iceberg branches, `fast_forward`, tags, `rollback_to_snapshot` | the same Iceberg procedures on Iceberg in CDP | nothing |
 | Orchestration | `make` targets | Oozie, Airflow in CDE, or Control-M | one task per layer; the exit code of `quality.py` gates publishing |
 | Security | localhost only, lab credentials | Kerberos, TLS everywhere, Ranger row filters and column masks | configuration, not code |
 
@@ -395,6 +517,8 @@ Recorded as ADRs in [`docs/adr/`](docs/adr/README.md):
 | [0005](docs/adr/0005-gold-marts.md) | Atomic overwrite marts; panel weight; baseline churn score | recompute cost vs. simplicity and atomicity |
 | [0006](docs/adr/0006-engines.md) | Spark for pipelines, Trino for interactive SQL | two engines vs. the right latency profile for each workload |
 | [0007](docs/adr/0007-table-maintenance.md) | Merge-on-read + scheduled maintenance | read amplification between compactions vs. cheap frequent writes |
+| [0008](docs/adr/0008-write-audit-publish.md) | Write-audit-publish on Iceberg branches, audited by Great Expectations | branch and tag retention vs. readers never seeing unaudited data |
+| [0009](docs/adr/0009-openlineage.md) | Lineage from the Spark jobs with OpenLineage, stored in Marquez | one more service vs. lineage that stays current |
 
 ## Data model
 
@@ -420,22 +544,24 @@ Storage after the final scale-1 state (pipeline + demos + Scala job): 16 tables,
 masterfabric-lakehouse-lab/
 ├── Makefile                    every step as a target (make help)
 ├── docker/
-│   ├── compose.yaml            s3 (RustFS), s3-init, catalog (Iceberg REST), spark, trino
-│   ├── spark/                  image: spark-iceberg 3.5.5_1.8.1 + config + pytest
+│   ├── compose.yaml            s3 (RustFS), s3-init, catalog (Iceberg REST), spark, trino; marquez (profile lineage)
+│   ├── spark/                  image: spark-iceberg 3.5.5_1.8.1 + config + pytest, Great Expectations, OpenLineage
+│   ├── marquez/                Marquez API configuration
 │   └── trino/                  Iceberg connector on the same REST catalog
 ├── generator/telco_gen.py      deterministic synthetic operator with injected defects
 ├── lakehouse/
 │   ├── bronze.py  silver.py  gold.py  quality.py      the medallion pipeline
 │   ├── rules.py                I/O-free cleaning rules (unit tested)
 │   ├── iceberg_demos.py        evolution, late corrections, time travel, maintenance
+│   ├── wap.py  expectations.py write-audit-publish on branches with a Great Expectations audit
 │   ├── admin.py                storage report, purge
 │   └── spark.py                session factory and helpers
 ├── jobs/scala/CellCongestionRanking.scala
 ├── notebooks/lakehouse_tour.ipynb   executed, real outputs
 ├── scripts/                    run_pipeline, benchmark, trino_queries, charts, diagrams, hero, screenshots
-├── tests/unit  tests/spark     8 + 6 tests
+├── tests/unit  tests/spark     8 + 12 tests
 └── docs/
-    ├── adr/                    7 decision records
+    ├── adr/                    9 decision records
     ├── results/                every measured number (JSON + Trino markdown)
     ├── images/  screenshots/   generated charts and diagrams, real UI captures
     └── TIMELINE.md             how the repository was built, commit by commit
@@ -460,6 +586,14 @@ Honest boundaries of a laptop lab:
   assumption that turns a 2,000-subscriber sample into meaningful cell load.
 - **Iceberg demo runs once per lake.** It changes the schema and partition spec of `silver.cdr`;
   replay with `make reset pipeline demos`.
+- **Write-audit-publish is shown on one table.** `make wap` audits two deliveries into
+  `silver.cdr`; gold is not rebuilt from the published day, and branch retention is not automated.
+  The learned thresholds come from seven days of synthetic data.
+- **`make lineage` purges and regenerates the lake** so every job emits events from an empty
+  start; its result files go to `.out/`, so the committed pipeline results are from the earlier
+  benchmark run. Marquez runs as amd64 images under emulation on Apple silicon.
+- **Lineage gaps.** Column lineage stops at `bronze.cdr_raw` for the CDR feed, and branch writes
+  are recorded as writes to `silver.cdr`. Marquez has no authentication in this setup.
 - **Spark runs in local mode.** One JVM with four cores; no shuffle service, executors or
   dynamic allocation to tune.
 
@@ -477,8 +611,8 @@ This repository is the first of a series that together describe one data and AI 
 8. **masterfabric-spark-rust-bench**: the same data jobs in Spark and in Rust (Polars, DataFusion).
 9. **masterfabric-data-architecture-adr**: the architecture across all of them.
 
-Next for this lab: Hive Metastore + Ranger profile for CDP parity, Iceberg branches and tags for
-write-audit-publish, column statistics (Puffin) for Trino's cost-based optimizer, and a
+Next for this lab: Hive Metastore + Ranger profile for CDP parity, write-audit-publish for every
+silver table with automatic branch retention, column statistics (Puffin) for Trino's cost-based optimizer, and a
 `days(event_time)` + `bucket(subscriber_id)` layout benchmark at larger scale.
 
 ## Contributing, security, license
