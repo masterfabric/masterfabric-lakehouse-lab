@@ -104,7 +104,59 @@ services:
     ports:
       - "127.0.0.1:${PORT_TRINO}:8080"
 
+  # Lineage (profile "lineage"): Marquez stores OpenLineage events from Spark jobs and draws the
+  # dataset/job graph. Start with `make lineage-up`; the default stack does not need it.
+  marquez-db:
+    image: postgres:16.4
+    container_name: mf-lake-marquez-db
+    profiles: ["lineage"]
+    environment:
+      POSTGRES_USER: marquez
+      POSTGRES_PASSWORD: ${MARQUEZ_DB_PASSWORD}
+      POSTGRES_DB: marquez
+    volumes:
+      - marquez-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marquez"]
+      interval: 3s
+      retries: 30
+
+  marquez:
+    image: marquezproject/marquez:0.51.1
+    platform: linux/amd64
+    container_name: mf-lake-marquez
+    profiles: ["lineage"]
+    depends_on:
+      marquez-db:
+        condition: service_healthy
+    environment:
+      MARQUEZ_CONFIG: /etc/marquez/marquez.yml
+      POSTGRES_HOST: marquez-db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: marquez
+      POSTGRES_USER: marquez
+      POSTGRES_PASSWORD: ${MARQUEZ_DB_PASSWORD}
+    volumes:
+      - ./marquez/marquez.yml:/etc/marquez/marquez.yml:ro
+    ports:
+      - "127.0.0.1:${PORT_MARQUEZ_API}:5000"
+
+  marquez-web:
+    image: marquezproject/marquez-web:0.51.1
+    platform: linux/amd64
+    container_name: mf-lake-marquez-web
+    profiles: ["lineage"]
+    depends_on:
+      - marquez
+    environment:
+      MARQUEZ_HOST: marquez
+      MARQUEZ_PORT: "5000"
+      WEB_PORT: "3000"
+    ports:
+      - "127.0.0.1:${PORT_MARQUEZ_WEB}:3000"
+
 volumes:
   s3-data:
   catalog-data:
   spark-events:
+  marquez-db:

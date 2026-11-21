@@ -8,7 +8,7 @@ DAYS    ?= 7
 PY      ?= .venv/bin/python
 
 .PHONY: help env up down ps logs generate archive bronze silver gold quality demos scala pipeline \
-        test test-unit test-spark bench trino-sql notebook screenshots assets clean-data reset
+        test test-unit test-spark bench lineage-up lineage-down lineage wap lineage-export trino-sql notebook screenshots assets clean-data reset
 
 help: ## Show targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n",$$1,$$2}'
@@ -83,6 +83,30 @@ screenshots: ## Capture UI screenshots with Playwright (stack must be up)
 
 assets: ## Render charts, diagrams and the hero image from real results
 	cd scripts && ../$(PY) make_diagrams.py && ../$(PY) make_charts.py && ../$(PY) make_hero.py
+
+# --- Lineage, data quality and write-audit-publish ---------------------------------------------
+LINEAGE := --conf spark.extraListeners=io.openlineage.spark.agent.OpenLineageSparkListener \
+           --conf spark.openlineage.transport.type=http \
+           --conf spark.openlineage.transport.url=http://marquez:5000 \
+           --conf spark.openlineage.namespace=mf-lakehouse
+LRESULTS := -e LAKE_RESULTS=/lab/.out/lineage-run
+
+lineage-up: env ## Start Marquez (OpenLineage backend + UI on 127.0.0.1:13100)
+	$(COMPOSE) --profile lineage up -d marquez-db marquez marquez-web
+
+lineage-down: ## Stop Marquez (keeps its volume)
+	$(COMPOSE) --profile lineage stop marquez-web marquez marquez-db
+
+lineage: ## Purge, regenerate and run bronze -> silver -> gold -> quality with OpenLineage on
+	$(SUBMIT) lakehouse/admin.py purge
+	$(SPARK) python -m generator.telco_gen --out /landing --scale $(SCALE) --days $(DAYS)
+	for j in bronze silver gold quality; do docker exec -w /lab $(LRESULTS) mf-lake-spark spark-submit --driver-memory 3g $(LINEAGE) lakehouse/$$j.py || exit 1; done
+
+wap: ## Write-audit-publish on Iceberg branches with a Great Expectations gate (lineage on)
+	docker exec -w /lab mf-lake-spark spark-submit --driver-memory 3g $(LINEAGE) lakehouse/wap.py
+
+lineage-export: ## Save the lineage graph from Marquez to docs/results/lineage.json
+	$(PY) scripts/lineage_export.py
 
 clean-data: ## Delete generated landing files (not the lake)
 	rm -rf data/landing/*

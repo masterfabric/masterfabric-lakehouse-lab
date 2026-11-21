@@ -1,0 +1,29 @@
+# Marquez API configuration for the lab: Postgres credentials from the environment, no search
+# backend (OpenSearch is optional in Marquez and not needed for lineage graphs).
+server:
+  applicationConnectors:
+    - type: http
+      port: 5000
+      httpCompliance: RFC7230_LEGACY
+  adminConnectors:
+    - type: http
+      port: 5001
+
+db:
+  driverClass: org.postgresql.Driver
+  url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+  user: ${POSTGRES_USER}
+  password: ${POSTGRES_PASSWORD}
+
+migrateOnStartup: true
+
+graphql:
+  enabled: true
+
+search:
+  enabled: false
+
+logging:
+  level: INFO
+  appenders:
+    - type: console
